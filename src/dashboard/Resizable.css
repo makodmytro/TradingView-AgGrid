@@ -1,0 +1,54 @@
+
+.resizable-container {
+    display: flex;
+    width: 100%; /* For demo purposes */
+    flex: 1 1 auto; /* Makes it fill up any available space */
+    overflow: hidden; /* To hide overflowed content */
+}
+
+
+.resizable-left-child {
+    flex-basis: 50%;
+    overflow: auto; /* Allow scrolling when content overflows */
+}
+
+.resizable-right-child {
+    position: relative;
+    flex-basis: 49.5%;
+    overflow: auto; /* Allow scrolling when content overflows */
+    height: 100%; /* Occupy full height of parent */
+}
+
+.resizer {
+    cursor: ew-resize; /* Horizontal resize cursor */
+    background: #a6a2a2; /* Color of the resizer */
+    flex-basis: 0.5%;
+}
+
+.wrapper-container {
+    position: relative; /* Enable absolute positioning within it */
+    width: 100%;
+    height: 100%;
+}
+
+.toggle-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    background-color: #a6a2a2; /* Or any other color */
+    padding: 10px;
+    z-index: 3;
+    opacity: 0.1; /* Make button nearly invisible */
+    transition: opacity 0.3s ease; /* Add transition */
+}
+.toggle-button:hover {
+    opacity: 1; /* Make button fully visible on hover */
+}
+.left-toggle {
+    left: 0;
+}
+
+.right-toggle {
+    right: 0;
+}

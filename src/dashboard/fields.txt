@@ -1,0 +1,14 @@
+name //Instrument in the gui
+ltp
+symbol
+bto
+sector
+price_high
+price_trend
+price_low
+rating
+action // Buy / Sell
+entry_price
+take_profit
+stop_loss
+status

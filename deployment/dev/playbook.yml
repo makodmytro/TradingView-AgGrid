@@ -1,0 +1,137 @@
+---
+- name: Deploy Web Dashboard
+  hosts: dev-vm
+  gather_facts: No
+  vars:
+    script_dir: "{{ playbook_dir }}"
+    project_root: "{{ playbook_dir | dirname | dirname }}"
+    remote_dir: "/root/app/web-dashboard"
+    container_name: "web-dashboard"
+  tasks:
+    - block:
+        - name: Set Timestamp
+          set_fact:
+            timestamp: "{{ lookup('pipe', 'date -u +%y%m%d%H%M%S') }}"
+          delegate_to: localhost
+
+        - name: Install node packages
+          command: npm install
+          args:
+            chdir: "{{ project_root }}"
+          delegate_to: localhost
+
+        - name: delete local build folder
+          file:
+            path: "{{ project_root }}/build"
+            state: absent
+          delegate_to: localhost
+
+        - name: Backup .env file
+          copy:
+            src: "{{ project_root }}/.env"
+            dest: "{{ project_root }}/.env.bak"
+          delegate_to: localhost
+
+        - name: Replace .env with env-dev
+          copy:
+            src: "{{ project_root }}/dev-env"
+            dest: "{{ project_root }}/.env"
+          delegate_to: localhost
+
+        - name: Build the React app
+          command: npm run build
+          args:
+            chdir: "{{ project_root }}"
+          delegate_to: localhost
+        - name: Copy build folder to deployment folder
+          copy:
+            src: "{{ project_root }}/build"
+            dest: "{{ script_dir }}"
+          delegate_to: localhost
+
+        - name: Build Docker Image
+          docker_image:
+            name: "web-dashboard:{{ timestamp }}"
+            source: build
+            build:
+              path: "{{ script_dir }}"
+            state: present
+          delegate_to: localhost
+
+        - name: Archive Docker Image
+          community.docker.docker_image:
+            name: web-dashboard
+            tag: "{{ timestamp }}"
+            archive_path: "{{ script_dir }}/web-dashboard:{{ timestamp }}.tar"
+            source: local
+          delegate_to: localhost
+
+        - name: Ensure the remote directory exists
+          file:
+            path: "{{ remote_dir }}"
+            state: directory
+
+        - name: Synchronize Docker Image Archive to Remote Server
+          synchronize:
+            src: "{{ script_dir }}/web-dashboard:{{ timestamp }}.tar"
+            dest: "{{ remote_dir }}"
+          delegate_to: localhost
+
+        - name: Load Docker Image from Tarball
+          community.docker.docker_image:
+            load_path: "{{ remote_dir }}/web-dashboard:{{ timestamp }}.tar"
+            name: web-dashboard
+            tag: "{{ timestamp }}"
+            source: load
+
+        - name: Stop Docker Container
+          community.docker.docker_container:
+            name: "{{ container_name }}"
+            state: stopped
+          ignore_errors: true
+
+        - name: Remove Docker Container
+          community.docker.docker_container:
+            name: "{{ container_name }}"
+            state: absent
+          ignore_errors: true
+
+        - name: Run Docker Container
+          community.docker.docker_container:
+            name: "{{ container_name }}"
+            image: "web-dashboard:{{ timestamp }}"
+            state: started
+            detach: yes
+            ports:
+              - "32299:80" # Adjust the port mapping as per your need.
+            restart_policy: unless-stopped
+      always:
+        - name: Restore original .env file
+          copy:
+            src: "{{ project_root }}/.env.bak"
+            dest: "{{ project_root }}/.env"
+          delegate_to: localhost
+
+        - name: Cleanup, delete backup .env
+          file:
+            path: "{{ project_root }}/.env.bak"
+            state: absent
+          delegate_to: localhost
+
+        - name: Remove Local Files
+          file:
+            path: "{{ item }}"
+            state: absent
+          with_items:
+            - "{{ script_dir }}/web-dashboard:{{ timestamp }}.tar"
+            - "{{ script_dir }}/build"
+          delegate_to: localhost
+
+        - name: Remove Local Docker Image
+          docker_image:
+            name: "web-dashboard:{{ timestamp }}"
+            state: absent
+          delegate_to: localhost
+
+        - name: Prune Unused Remote Docker Images
+          command: docker image prune -f

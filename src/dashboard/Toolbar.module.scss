@@ -1,0 +1,47 @@
+@use "sass:map";
+@use "../design-system/" as *;
+
+$toolbar-width: 1024px;
+
+// Color Variables
+$primary-color: #3498db; // For buttons and active links
+$secondary-color: #2c3e50; // Navbar and toolbar background
+.toolbar {
+    width: 100%;
+    position: relative;
+    background: $secondary-color;
+    border-bottom: 2px solid darken($secondary-color, 10%);
+}
+
+.controlsContainer {
+    padding: $size-2 0;
+    max-width: $toolbar-width;
+    margin: 0 auto;  // Center the controlsContainer
+    overflow: auto;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;  // Distribute space between the elements
+    width: 100%; // Take full width
+    position: relative;
+
+    select, input {
+        margin-right: $size-3;
+    }
+}
+
+.rightSection {
+    display: flex;
+    align-items: center;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+
+    a {
+        margin: 0 $size-2;
+    }
+}

@@ -1,0 +1,104 @@
+@use "sass:map";
+@use "../design-system/" as *;
+
+$toolbar-width: 100%;
+// Updated Color Variables
+$primary-color: #2980b9; // For buttons and active links
+$secondary-color: #121a21; // Blackish navbar and toolbar background
+$border-color: darken($secondary-color, 15%);
+
+.toolbar {
+    width: 100%;
+    position: relative;
+    background: $secondary-color;
+    border-bottom: 1px solid $border-color;
+
+    & a:hover {
+        text-decoration: underline;
+    }
+}
+.controlsContainer {
+    padding: $size-1;
+    overflow: auto;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    width: $toolbar-width;
+    position: relative;
+
+    select, input, label {
+        max-width: 180px;
+        margin-right: $size-1;
+        padding: 4px 6px;
+        border: 1px solid $border-color;
+        border-radius: 3px;
+        background: darken($secondary-color, 7%);
+        color: #fff;
+        font-size: 0.85rem; // Even smaller text for compact design
+    }
+
+    .rightSection {
+        display: flex;
+        margin-left: auto;
+        padding: 4px 8px;
+        border-radius: 3px;
+
+        button {
+            background: $primary-color;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 2px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 0.85rem;
+
+            &:hover {
+                background: darken($primary-color, 10%);
+            }
+
+            & + button {
+                margin-left: $size-1;
+            }
+        }
+    }
+}
+
+.scrollIndicator {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 50px;
+    background: linear-gradient(90deg, transparent 0%, $secondary-color 110%);
+    pointer-events: none;
+
+    @media (min-width: $toolbar-width) {
+        display: none;
+    }
+}
+
+.navbar {
+    display: flex;
+    margin-left: $size-1;
+
+    a {
+        margin: 0 $size-1;
+        text-decoration: none;
+        color: lighten($secondary-color, 50%);
+        padding: 3px 6px;
+        border-radius: 2px;
+        transition: background-color 0.3s;
+        font-size: 0.85rem;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+    }
+}
+
+.logoutButton {
+    margin-left: $size-1;
+}
